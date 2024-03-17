@@ -1,0 +1,37 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace library_for_kr
+{
+    class Ellipse : IComparable<Ellipse>
+    {
+        public double D1 { get; }
+        public double D2 { get; }
+        public double Plosh => Math.PI * D1 * D2;
+
+        public Ellipse(double d1, double d2)
+        {
+            if (d1 <= 0 || d2 <= 0)
+            {
+                throw new ArgumentException("Диаметры должны быть больше нуля.");
+            }
+            D1 = Math.Min(d1, d2);
+            D2 = Math.Max(d1, d2);
+        }
+
+        public int CompareTo(Ellipse other)
+        {
+            if (other == null)
+                return 1;
+            return Plosh.CompareTo(other.Plosh);
+        }
+
+        public override string ToString()
+        {
+            return $"{D1} {D2}";
+        }
+    }
+}
