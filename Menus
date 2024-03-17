@@ -1,0 +1,210 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace library_for_kr
+{
+    public static class Menus
+    {
+        // Создаем валидатор для полученного пути.
+        static MyValidator validator = new MyValidator();
+
+        /// <summary>
+        /// Основное меню.
+        /// </summary>
+        public static void MainMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("Выберите действие:");
+            Console.WriteLine("1. Ввести путь до папки с файлами");
+            Console.WriteLine("2. Использовать стандартную папку");
+            Console.WriteLine($"{Environment.NewLine}0. Выход");
+
+            switch (Console.ReadKey(true).Key)
+            {
+                case ConsoleKey.D1:
+                    SecondMenu(validator.GetAbsFieldToDirectory());
+                    break;
+                case ConsoleKey.D2:
+                    SecondMenu();
+                    break;
+                case ConsoleKey.D0:
+                    Environment.Exit(0);
+                    break;
+                default:
+                    MainMenu();
+                    break;
+            }
+
+        }
+
+        /// <summary>
+        /// Получение названия файла
+        /// </summary>
+        /// <param name="dirPath">путь до папки</param>
+        static void SecondMenu(string dirPath = "../../../../input/")
+        {
+            if (!dirPath.EndsWith("\\") || !dirPath.EndsWith("/"))
+            {
+                dirPath += "\\";
+            }
+            string fileName;
+            Console.Clear();
+            Console.WriteLine($"Файлы в папке {Path.GetFullPath(dirPath)}:");
+            List<string> fileNames = Utils.GetAllFilesFromDir(dirPath);
+
+            foreach (string file in fileNames)
+            {
+                Console.WriteLine($"{file}");
+            }
+
+            do
+            {
+                Console.Write($"{Environment.NewLine}Введите название файла без его разрешения: ");
+                fileName = Console.ReadLine();
+            } while (fileNames.IndexOf(fileName + ".txt") == -1);
+
+            EllipseList rectangle = new EllipseList(dirPath + fileName + ".txt");
+
+            LogicMenu(rectangle, dirPath);
+        }
+
+        static void LogicMenu(EllipseList ellipses, string dirPath)
+        {
+            Console.Clear();
+            Console.WriteLine("Выберите действие:");
+            Console.WriteLine("1. Создать EllipseList");
+            Console.WriteLine("2. Сохранить в неупорядочном формате");
+            Console.WriteLine("3. Сохранить в диапозоне");
+            Console.WriteLine("4. Сохранить по убыванию");
+            Console.WriteLine("5. Показать первый");
+            Console.WriteLine("6. Показать второй");
+            Console.WriteLine($"{Environment.NewLine}Нажмите Escape для выхода из программы");
+            while (true)
+            {
+                switch (Console.ReadKey(true).Key)
+                {
+                    case ConsoleKey.D1:
+                        SecondMenu(dirPath);
+                        break;
+                    case ConsoleKey.D2:
+                        Save(ellipses, dirPath);
+                        break;
+                    case ConsoleKey.D3:
+                        Save(ellipses, dirPath, true);
+                        break;
+                    case ConsoleKey.D4:
+                        SaveR(ellipses, dirPath);
+                        break;
+                    case ConsoleKey.D5:
+                        ShowFirstMenu(ellipses, dirPath);
+                        break;
+                    case ConsoleKey.D6:
+                        ShowSecondMenu(ellipses, dirPath);
+                        break;
+                    case ConsoleKey.Escape:
+                        throw new NetworkInformationException();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+
+        static void ShowFirstMenu(EllipseList ellipse, string dirPath)
+        {
+            Console.Clear();
+            Console.WriteLine("Площадь не более 4:");
+            List<Ellipse> ellipses = new List<Ellipse>();
+            foreach (Ellipse rect in ellipse.GetReverseEnumerator())
+            {
+                ellipses.Add(rect);
+            }
+            foreach (Ellipse rec in ellipses.Where(x => x.Plosh <= 4))
+            {
+                Console.WriteLine(rec.ToString());
+            }
+
+            Thread.Sleep(3000);
+            LogicMenu(ellipse, dirPath);
+        }
+        static double GetAverageD2(List<Ellipse> ellipses)
+        {
+            return ellipses.Select(x => x.D2).ToList().Average();
+        }
+        static void ShowSecondMenu(EllipseList ellipse, string dirPath)
+        {
+            Console.Clear();
+            Console.WriteLine("Больший диаметр не превосходит среднего большего диаметра:");
+            List<Ellipse> ellipses = new List<Ellipse>();
+            foreach (Ellipse rect in ellipse)
+            {
+                ellipses.Add(rect);
+            }
+            
+            foreach (Ellipse rec in ellipses.Where(x => x.D2 <= GetAverageD2(ellipses)))
+            {
+                Console.WriteLine(rec.ToString());
+            }
+
+            Thread.Sleep(3000);
+            LogicMenu(ellipse, dirPath);
+        }
+
+        static void Save(EllipseList ellipse, string dirPath, bool needDiaposon = false)
+        {
+            int m1 = 0 , m2 = 0;
+            if (needDiaposon)
+            {
+                DataProcessing.ReadInt("Введите значение минимума: ", out m1, 0);
+                DataProcessing.ReadInt("Введите значение максимума: ", out m2, 0);
+            }
+            int numberOfFile = Utils.FindMaxNumberedFile(Utils.GetAllFilesFromDir(dirPath));
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(Environment.NewLine);
+
+            foreach (Ellipse rect in ellipse)
+            {
+                if (needDiaposon)
+                {
+                    if ((rect.Plosh >= m1) && (rect.Plosh <= m2))
+                    {
+                        sb.Append(rect.ToString() + Environment.NewLine);
+                    }   
+                }
+                else
+                {
+                    sb.Append(rect.ToString() + Environment.NewLine);
+                }
+                
+            }
+
+            File.AppendAllText(dirPath + $"output.txt", sb.ToString());
+
+            LogicMenu(ellipse, dirPath);
+        }
+
+        static void SaveR(EllipseList ellipse, string dirPath)
+        {
+            // думал надо ноые output создавать
+            int numberOfFile = Utils.FindMaxNumberedFile(Utils.GetAllFilesFromDir(dirPath));
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Environment.NewLine);
+            foreach (Ellipse rect in ellipse.GetReverseEnumerator())
+            {
+                sb.Append(rect.ToString() + Environment.NewLine);
+            }
+
+            File.AppendAllText(dirPath + $"output.txt", sb.ToString());
+
+            LogicMenu(ellipse, dirPath);
+        }
+    }
+}
