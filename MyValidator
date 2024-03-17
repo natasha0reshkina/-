@@ -1,0 +1,251 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+namespace library_for_kr
+{
+    public class MyValidator
+    {
+        private static string _format;
+
+        public MyValidator(string format = "txt")
+        {
+            Format = format;
+        }
+
+        public string Format
+        {
+            get { return _format; }
+            set
+            {
+                if (value is null)
+                {
+                    // Возвращаем что format не может быть нулевым значением.
+                    throw new ArgumentNullException("format can`t be null");
+                }
+                _format = value;
+            }
+        }
+
+        // Используем регулярные выражения, чтобы проверить:
+        // наличие запрещенных символов в абсолютном пути и указание латинской буквы в названии диска        
+        Regex badChars = new Regex("^[a-zA-Z][^<>'|?*\"]+$");
+        // наличие необходимых символов для построение абсолютного пути
+        Regex nesChars = new Regex(@":+[/\\]+");
+        // наличие названия у введенного файла и отсуствия там запрещенных символов
+        Regex name = new Regex(@"((\\|/|^)(\w|\s)+\.\w+)", RegexOptions.RightToLeft);
+
+        static bool isRightFormat;
+
+        /// <summary>
+        /// Функция получения абсолютного пути от пользователя.
+        /// </summary>
+        /// <param Name="message">
+        /// Строка с текстом, выводимая пользователю.
+        /// </param>
+        /// <param Name="infoFlag">
+        /// Логическая переменная для вывода дополнительной информации.
+        /// </param>
+        /// <returns>
+        /// Возвращает строку с подходящим путем.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// Обработка в случае передачи в регулярное выражение null значения.
+        /// </exception>
+        public string GetAbsField(string message = "Введите абсолютный путь: ", bool infoFlag = true)
+        {
+            string absolutePath;
+
+            Match hasBadChars;
+            Match hasNesChars;
+            Match correctName;
+
+
+            if (infoFlag)
+            {
+                Console.WriteLine("Абсолютный путь, указанный вами, не должен содержать запрещенные знаки для абсолютного пути: [<>'|?*\"]");
+            }
+
+            do
+            {
+                isRightFormat = true;
+                Console.Write(message);
+                absolutePath = Console.ReadLine();
+
+                if (absolutePath is null)
+                {
+                    throw new ArgumentNullException("Передано null значение вместо абсолютного пути.");
+                }
+
+                hasBadChars = badChars.Match(absolutePath);
+                hasNesChars = nesChars.Match(absolutePath);
+                correctName = name.Match(absolutePath);
+
+                if (!hasBadChars.Success)
+                {
+                    Console.WriteLine("Абсолютный путь был указан с использованием запрещенных символов.");
+                }
+
+                if (!hasNesChars.Success)
+                {
+                    Console.WriteLine($"Указан не абсолютный путь.");
+                }
+
+                if (!correctName.Success)
+                {
+                    Console.WriteLine($"Не указано имя файла или оно указано с использованием запрещенных символов. [/\\:*?<>|\"]");
+                }
+
+                if ((absolutePath.Length < _format.Length + 1) || (!String.Equals(absolutePath.Substring(absolutePath.Length - _format.Length - 1), $".{_format}")))
+                {
+                    Console.WriteLine($"Указано неверное разрешение файла.");
+                    isRightFormat = false;
+                }
+
+                if (!hasBadChars.Success || !isRightFormat || !hasNesChars.Success || !correctName.Success)
+                {
+                    Console.WriteLine($"Повторите попытку.{Environment.NewLine}");
+                }
+
+            }
+            while (!hasBadChars.Success || !isRightFormat || !hasNesChars.Success || !correctName.Success);
+
+            return absolutePath;
+        }
+
+
+        /// <summary>
+        /// Функция получения абсолютного пути от пользователя до папки.
+        /// </summary>
+        /// <param Name="message">
+        /// Строка с текстом, выводимая пользователю.
+        /// </param>
+        /// <param Name="infoFlag">
+        /// Логическая переменная для вывода дополнительной информации.
+        /// </param>
+        /// <returns>
+        /// Возвращает строку с подходящим путем.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// Обработка в случае передачи в регулярное выражение null значения.
+        /// </exception>
+        public string GetAbsFieldToDirectory(string message = "Введите абсолютный путь до директории: ", bool infoFlag = true)
+        {
+            string absolutePath;
+
+            Match hasBadChars;
+            Match hasNesChars;
+
+
+            if (infoFlag)
+            {
+                Console.WriteLine("Абсолютный путь, указанный вами, не должен содержать запрещенные знаки для абсолютного пути: [<>'|?*\"]");
+            }
+
+            do
+            {
+                isRightFormat = true;
+                Console.Write(message);
+                absolutePath = Console.ReadLine();
+
+                if (absolutePath is null)
+                {
+                    throw new ArgumentNullException("Передано null значение вместо абсолютного пути.");
+                }
+
+                hasBadChars = badChars.Match(absolutePath);
+                hasNesChars = nesChars.Match(absolutePath);
+
+                if (!hasBadChars.Success)
+                {
+                    Console.WriteLine("Абсолютный путь был указан с использованием запрещенных символов.");
+                }
+
+                if (!hasNesChars.Success)
+                {
+                    Console.WriteLine($"Указан не абсолютный путь.");
+                }
+
+
+                if (!hasBadChars.Success || !isRightFormat || !hasNesChars.Success || !Directory.Exists(absolutePath))
+                {
+                    Console.WriteLine($"Повторите попытку.{Environment.NewLine}");
+                }
+
+            }
+            while (!hasBadChars.Success || !isRightFormat || !hasNesChars.Success || !Directory.Exists(absolutePath));
+
+            return absolutePath;
+        }
+
+        /// <summary>
+        /// Функция получения пути от пользователя.
+        /// </summary>
+        /// <param Name="message">
+        /// Строка с текстом, выводимая пользователю.
+        /// </param>
+        /// <param Name="infoFlag">
+        /// Логическая переменная для вывода дополнительной информации.
+        /// </param>
+        /// <returns>
+        /// Возвращает строку с подходящим путем.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// Обработка в случае передачи в регулярное выражение null значения.
+        /// </exception>
+        public string GetField(string message = "Введите путь: ", bool infoFlag = true)
+        {
+            string path;
+
+            Match hasBadChars;
+            Match correctName;
+
+            if (infoFlag)
+            {
+                Console.WriteLine("Путь, указанный вами, не должен содержать запрещенные знаки для пути: [<>'|?*\"]");
+            }
+            do
+            {
+                isRightFormat = true;
+                Console.Write(message);
+                path = Console.ReadLine();
+                if (path is null)
+                {
+                    throw new ArgumentNullException("Передано null значение вместо абсолютного пути.");
+                }
+                hasBadChars = badChars.Match(path);
+                correctName = name.Match(path);
+
+                if (!hasBadChars.Success)
+                {
+                    Console.WriteLine($"Путь был указан с использованием запрещенных символов.");
+                }
+
+                if (!correctName.Success)
+                {
+                    Console.WriteLine($"Не указано имя файла или оно указано с использованием запрещенных символов. [/\\:*?<>|]");
+                }
+
+
+                if ((path.Length < _format.Length + 1) || (!String.Equals(path.Substring(path.Length - _format.Length - 1), $".{_format}")))
+                {
+                    Console.WriteLine($"Указано неверное разрешение файла.");
+                    isRightFormat = false;
+                }
+
+                if (!hasBadChars.Success || !isRightFormat || !correctName.Success)
+                {
+                    Console.WriteLine($"Повторите попытку.{Environment.NewLine}");
+                }
+
+            }
+            while (!hasBadChars.Success || !isRightFormat || !correctName.Success);
+
+            return path;
+        }
+    }
+}
