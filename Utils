@@ -1,0 +1,53 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+namespace library_for_kr
+{
+    public class Utils
+    {
+        public static List<string> GetAllFilesFromDir(string directoryPath, string fileExtension = ".txt")
+        {
+            List<string> fileList = new List<string>();
+
+            string[] filePaths = Directory.GetFiles(directoryPath);
+            foreach (string filePath in filePaths)
+            {
+                if (filePath.EndsWith(fileExtension))
+                {
+                    string fileName = Path.GetFileName(filePath);
+                    fileList.Add(fileName);
+                }
+
+            }
+            return fileList;
+        }
+
+        public static int FindMaxNumberedFile(List<string> fileList)
+        {
+            int maxNumber = 0;
+            Regex regex = new Regex(@"output-(\d+)");
+
+            foreach (string fileName in fileList)
+            {
+                Match match = regex.Match(fileName);
+                if (match.Success)
+                {
+                    string numberString = match.Groups[1].Value;
+                    int number;
+                    if (int.TryParse(numberString, out number))
+                    {
+                        maxNumber = Math.Max(maxNumber, number);
+                    }
+                }
+            }
+
+            return maxNumber;
+        }
+
+    }
+}
