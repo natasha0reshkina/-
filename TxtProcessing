@@ -1,0 +1,80 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace library_for_kr
+{
+    class TxtProcessing
+    {
+        /// <summary>
+        /// Сокращенная запись TryParse.
+        /// </summary>
+        /// <param name="str">Строка для конвертации.</param>
+        /// <param name="x">Значение, в которое будет вписано значение в случае успеха.</param>
+        /// <returns>True\False результата конвертции.</returns>
+        public static bool checker(string str, out double x)
+        {
+            return double.TryParse(str, out x);
+        }
+
+        /// <summary>
+        /// Функция прочтения и проверки на правильность формата исходного файла.
+        /// </summary>
+        /// <param name="path">Путь до файла.</param>
+        /// <returns>Значения для получения значений.</returns>
+        /// <exception cref="ArgumentNullException">Передано null значение или файл не существует.</exception>
+        /// <exception cref="ArgumentException">Не соотвествие формату.</exception>
+        public static List<List<double>> Reader(string path)
+        {
+            if (path is null || !File.Exists(path))
+            {
+                // Путь до файла является null или его не существует.
+                throw new ArgumentNullException("Ошибка расположения файла.");
+            }
+
+            if (!String.Equals(path.Substring(path.Length - 4), ".txt"))
+            {
+                // Ошибка аргумента, так как аргумент передан с неправильным форматом.
+                throw new ArgumentException("Ошибка формата указанного файла.");
+            }
+
+            string[] rows = File.ReadAllLines(path);
+            List<List<double>> list = new List<List<double>>();
+            for (int i = 0; i < rows.Length; i++)
+            {
+                double x1, y1;
+
+                string[] xy1 = rows[i].Split(' ');
+                if (xy1.Length != 2)
+                {
+                    Console.WriteLine("Log: Нашли неподходящее значение меньше двух.");
+                }
+                else
+                {
+                    if (!checker(xy1[0], out x1) || !checker(xy1[1], out y1))
+                    {
+                        Console.WriteLine("Log: Нашли неподходящее значение.");
+                    }
+                    else
+                    {
+                        if (x1 > 0 & y1 > 0)
+                        {
+                            list.Add(new List<double> { x1, y1 });
+                        }
+                            
+                    }
+                }
+                    
+                    
+                
+
+            }
+            return list;
+        }
+
+    }
+}
