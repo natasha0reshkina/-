@@ -1,0 +1,64 @@
+using System.Net.NetworkInformation;
+using library_for_kr;
+
+class Program
+{
+    static void Main()
+    {
+        do
+        {
+            try
+            {
+                // Вызов основого меню.
+                Menus.MainMenu();
+            }
+            // мы обработали полученные значения с помощью TryParse, но добавим обработку самых популярных ошибок, чтобы исключить их появления во время вычисления
+            catch (FormatException ex)
+            {
+                Console.WriteLine($"Ошибка: неверный формат ввода{Environment.NewLine}{ex}");
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine($"Ошибка: Были введены не верные данные.{ex}{Environment.NewLine}");
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine($"Ошибка: передано null{Environment.NewLine}{ex}");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine($"Ошибка: нет прав для доступа к папке.{Environment.NewLine}Exception Log:{ex}");
+            }
+            catch (DivideByZeroException ex)
+            {
+                Console.WriteLine($"Ошибка: произошла ошибка деления на 0{Environment.NewLine}{ex}");
+            }
+            catch (ArithmeticException ex)
+            {
+                Console.WriteLine($"Ошибка: произошла перегрузка вычисления значений функции.{Environment.NewLine}Exception Log:{ex}{Environment.NewLine}");
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine($"Ошибка: указатель показывает на пустой аргумент{Environment.NewLine}{ex}");
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"Ошибка: произошло неправильное открытие файла или записывание структуры.{Environment.NewLine}Exception Log:{ex}");
+            }
+            catch (NetworkInformationException ex)
+            {
+                ; ;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка: необработанная ошибка{Environment.NewLine}{ex}");
+            }
+            finally
+            {
+                Console.WriteLine("Нажмите любую клавишу для повторного ввода");
+                Console.WriteLine("Нажмите Escape для завершения работы приложения");
+            }
+        } while (Console.ReadKey().Key != ConsoleKey.Escape);
+        Environment.Exit(0);
+    }
+}
