@@ -1,0 +1,68 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace library_for_kr
+{
+    public static class DataProcessing
+    {
+
+        /// <summary>
+        /// Получение целочисленного значения в диапозоне от пользователя.
+        /// </summary>
+        /// <param name="entery">Сообщение, которое выводится пользователю.</param>
+        /// <param name="value">Куда записывается значение.</param>
+        /// <param name="min">Нижняя граница диапозона.</param>
+        /// <param name="max">Верхняя граница диапозона.</param>
+        public static void ReadInt(string entery, out int value, double min = double.MinValue, double max = double.MaxValue)
+        {
+            bool check_value;
+            do
+            {
+                Console.Write(entery);
+                check_value = int.TryParse(Console.ReadLine(), out value);
+
+                if (!check_value)
+                {
+                    Console.WriteLine("Введено не число, повторите попытку.");
+                }
+
+                if (value < min || value > max)
+                {
+                    Console.WriteLine($"Введенное число находится вне границ ({min},{max}). Повторите попытку.");
+                }
+
+            } while (!check_value || value < min || value > max);
+        }
+
+        /// <summary>
+        /// Получение вещественного значения в диапозоне от пользователя.
+        /// </summary>
+        /// <param name="entery">Сообщение, которое выводится пользователю.</param>
+        /// <param name="value">Куда записывается значение.</param>
+        /// <param name="min">Нижняя граница диапозона.</param>
+        /// <param name="max">Верхняя граница диапозона.</param>
+        public static void ReadDouble(string entery, out double value, double min = double.MinValue, double max = double.MaxValue)
+        {
+            bool check_value;
+            do
+            {
+                Console.Write(entery);
+                check_value = double.TryParse(Console.ReadLine(), out value);
+
+                if (!check_value)
+                {
+                    Console.WriteLine("Введено не число, повторите попытку.");
+                }
+
+                if (value < min || value > max)
+                {
+                    Console.WriteLine($"Введенное число находится вне границ ({min},{max}). Повторите попытку.");
+                }
+
+            } while (!check_value || value < min || value > max);
+        }
+    }
+}
