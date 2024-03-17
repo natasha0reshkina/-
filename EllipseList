@@ -1,0 +1,64 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace library_for_kr
+{
+    class EllipseList : IEnumerable<Ellipse>
+    {
+        private Ellipse[] _ellipses;
+
+        public EllipseList(string filename)
+        {
+            try
+            {
+                List<List<double>> listWithR = TxtProcessing.Reader(filename);
+                
+                _ellipses = new Ellipse[listWithR.Count];
+
+                for (int i = 0; i < listWithR.Count; i++)
+                {
+                    _ellipses[i] = new Ellipse(listWithR[i][0], listWithR[i][1]);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading file: {ex}");
+                _ellipses = new Ellipse[0]; // Проинициализировать внутренний массив пустым массивом
+            }
+        }
+
+        public IEnumerator<Ellipse> GetEnumerator()
+        {
+            for (int i = 0; i < _ellipses.Length; i++)
+            {
+                yield return _ellipses[i];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerable<Ellipse> GetReverseEnumerator()
+        {
+            Ellipse[] result = new Ellipse[_ellipses.Length];
+            for (int i = 0; i < _ellipses.Length; i++)
+            {
+                result[i] = _ellipses[i];
+            }
+            Array.Sort(result);
+            for (int i = result.Length - 1; i >= 0; i--)
+            {
+                yield return result[i];
+            }
+        }
+    }
+}
